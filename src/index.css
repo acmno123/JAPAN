@@ -1,72 +1,356 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Noto+Serif+JP:wght@400;500;700&display=swap');
+import { useState } from 'react';
+import { ArrowDown, ArrowRight, BookOpen, Check, Compass, Headphones, MapPinned, Sparkles, Star, TrendingUp } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@layer base {
-  html {
-    scroll-behavior: smooth;
-    scroll-padding-top: 5rem;
-  }
-  body {
-    @apply bg-washi-50 text-sumi-700 antialiased transition-colors duration-500;
-    font-feature-settings: "palt";
-    text-rendering: optimizeLegibility;
-  }
-  .dark body {
-    @apply bg-sumi-900 text-sumi-200;
-  }
-  ::selection {
-    @apply bg-matcha-200 text-sumi-800;
-  }
-  .dark ::selection {
-    @apply bg-matcha-700 text-washi-100;
-  }
-  :focus-visible {
-    outline: 3px solid #789174;
-    outline-offset: 3px;
-  }
-  button:not(:disabled) {
-    cursor: pointer;
-  }
-  button:disabled {
-    cursor: not-allowed;
-  }
+interface LandingPageProps {
+  onStart: () => void;
+  onLogin: () => void;
 }
 
-@layer utilities {
-  .scrollbar-thin::-webkit-scrollbar {
-    height: 6px;
-    width: 6px;
-  }
-  .scrollbar-thin::-webkit-scrollbar-track {
-    @apply bg-transparent;
-  }
-  .scrollbar-thin::-webkit-scrollbar-thumb {
-    @apply bg-sumi-200/70 dark:bg-sumi-700 rounded-full;
-  }
-  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    @apply bg-matcha-300 dark:bg-matcha-600;
-  }
+export function LandingPage({ onStart, onLogin }: LandingPageProps) {
+  const { signUp } = useAuth();
+  const [signupOpen, setSignupOpen] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  /* Furigana ruby spacing */
-  ruby {
-    ruby-position: over;
-  }
-  rt {
-    text-transform: none;
-    letter-spacing: -0.02em;
-  }
-}
+  const handleSignup = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError(null);
+    setLoading(true);
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    scroll-behavior: auto !important;
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
+    const result = await signUp(email, password);
+    setLoading(false);
+
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
+
+    setSuccess(true);
+  };
+
+  const openSignup = () => {
+    setSignupOpen(true);
+    setError(null);
+    setSuccess(false);
+  };
+
+  const features = [
+    {
+      number: '01',
+      title: '拆解每一句日語',
+      text: '從語感到文法，讓你真正懂句子的意思，而不是死背字詞。',
+      icon: BookOpen,
+    },
+    {
+      number: '02',
+      title: '在情境中開口',
+      text: '用日常場景練習對話，從點餐到旅遊都能輕鬆說出口。',
+      icon: Headphones,
+    },
+    {
+      number: '03',
+      title: '符合你的節奏',
+      text: '每天推薦、進度追蹤與 JLPT 路線，隨著你慢慢變強。',
+      icon: TrendingUp,
+    },
+  ];
+
+  return (
+    <div className="min-h-screen overflow-hidden bg-[#f7f5ef] text-[#252821]">
+      <header className="relative z-20 mx-auto flex max-w-7xl items-center justify-between px-5 py-5 sm:px-8 lg:px-12">
+        <a href="#top" className="flex items-center gap-3" aria-label="AI-Nihongo 首頁">
+          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-[#314c3b] to-[#66816a] text-xl font-semibold text-white shadow-[0_16px_28px_rgba(49,76,59,0.22)]">
+            あ
+          </span>
+          <span>
+            <span className="block font-serif text-lg font-semibold tracking-tight text-[#24352b]">AI-Nihongo</span>
+            <span className="block text-[9px] font-medium tracking-[0.32em] text-[#7a7e73]">JAPANESE, YOUR WAY</span>
+          </span>
+        </a>
+
+        <nav className="hidden items-center gap-8 text-sm text-[#62675d] md:flex" aria-label="主要導覽">
+          <a className="transition hover:text-[#314c3b]" href="#method">學習方式</a>
+          <a className="transition hover:text-[#314c3b]" href="#features">平台特色</a>
+          <button onClick={onLogin} className="transition hover:text-[#314c3b]">登入</button>
+          <button onClick={openSignup} className="rounded-full bg-[#314c3b] px-5 py-2.5 font-medium text-white shadow-[0_12px_24px_rgba(49,76,59,0.18)] transition hover:-translate-y-0.5 hover:bg-[#243c2d]">
+            免費註冊
+          </button>
+        </nav>
+
+        <button
+          onClick={openSignup}
+          className="rounded-full bg-[#314c3b] px-4 py-2.5 text-sm font-medium text-white shadow-[0_12px_24px_rgba(49,76,59,0.18)] transition hover:bg-[#243c2d] md:hidden"
+        >
+          開始註冊
+        </button>
+      </header>
+
+      <main id="top">
+        <section className="mx-auto grid max-w-7xl items-center gap-12 px-5 pb-20 pt-8 sm:px-8 md:min-h-[640px] md:grid-cols-[0.94fr_1.06fr] md:gap-10 md:pb-24 md:pt-10 lg:px-12">
+          <div className="relative z-10 max-w-xl">
+            <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-[#dfe4d8] bg-white/70 px-3.5 py-2 text-xs font-medium tracking-[0.14em] text-[#526c54] backdrop-blur-sm">
+              <Sparkles className="h-3.5 w-3.5" />
+              讓日語，成為你的日常風景
+            </div>
+
+            <p className="mb-3 font-serif text-sm tracking-[0.35em] text-[#9b7054]">学ぶほど、世界が広がる。</p>
+
+            <h1 className="font-serif text-[3rem] font-medium leading-[1.08] tracking-[-0.065em] text-[#27362d] sm:text-6xl lg:text-[4.5rem]">
+              不只學日語，
+              <span className="text-[#66816a]">更靠近</span>
+              <br />
+              你喜歡的日本。
+            </h1>
+
+            <p className="mt-6 max-w-lg text-base leading-8 text-[#73776d] sm:text-lg">
+              從一句對話、一個新單字開始，讓每一次練習都更自然、更有感，慢慢走進日本的日常生活。
+            </p>
+
+            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+              <button onClick={openSignup} className="group inline-flex items-center justify-center gap-3 rounded-full bg-[#314c3b] px-7 py-4 text-sm font-semibold text-white shadow-[0_18px_34px_rgba(49,76,59,0.24)] transition hover:-translate-y-0.5 hover:bg-[#243c2d]">
+                免費開始學習
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </button>
+              <button onClick={onStart} className="inline-flex items-center justify-center gap-2 rounded-full border border-[#d9d9ce] bg-white/70 px-7 py-4 text-sm font-medium text-[#51594f] transition hover:border-[#b9c7b4] hover:text-[#314c3b]">
+                探索學習平台
+                <ArrowDown className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="mt-8 flex items-center gap-3 text-xs text-[#818579]">
+              <span className="flex -space-x-2" aria-hidden="true">
+                <span className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#f7f5ef] bg-[#d6b49b] text-[10px] text-white">A</span>
+                <span className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#f7f5ef] bg-[#a7b49b] text-[10px] text-white">Y</span>
+                <span className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#f7f5ef] bg-[#d7c88f] text-[10px] text-white">M</span>
+              </span>
+              <span>
+                <strong className="font-semibold text-[#4c554a]">每天 15 分鐘</strong>，累積成看得見的進步
+              </span>
+            </div>
+          </div>
+
+          <div className="relative mx-auto w-full max-w-[650px] md:ml-auto">
+            <div className="absolute -right-8 -top-8 h-40 w-40 rounded-full bg-[#e3e8d6] blur-3xl" />
+            <div className="absolute -bottom-10 -left-10 h-48 w-48 rounded-full bg-[#eadbca] blur-3xl" />
+
+            <div className="relative h-[420px] overflow-hidden rounded-[2rem] bg-[#d8d6ca] shadow-[0_28px_60px_rgba(49,76,59,0.18)] sm:h-[500px]">
+              <img
+                src="https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=1400&q=85"
+                alt="日本京都傳統街道與遠方的山景"
+                className="h-full w-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#17251d]/75 via-[#17251d]/10 to-[#17251d]/5" />
+
+              <div className="absolute left-6 top-6 flex items-center gap-2 rounded-full border border-white/30 bg-white/15 px-3.5 py-2 text-xs text-white backdrop-blur-md sm:left-8 sm:top-8">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#d7e8ba]" />
+                AI 個人化學習
+              </div>
+
+              <div className="absolute bottom-7 left-7 right-7 text-white sm:bottom-9 sm:left-9 sm:right-9">
+                <p className="text-[10px] tracking-[0.32em] text-white/70">YOUR NEXT CHAPTER</p>
+                <p className="mt-2 font-serif text-3xl sm:text-4xl">旅のはじまり。</p>
+                <p className="mt-2 text-sm text-white/80">讓每一次學習，都更接近你想要的日本生活。</p>
+              </div>
+            </div>
+
+            <div className="absolute -bottom-6 right-4 w-[220px] rounded-2xl border border-white/80 bg-[#fffefa]/95 p-4 shadow-[0_20px_40px_rgba(26,34,30,0.12)] sm:-right-8 sm:bottom-10">
+              <div className="flex items-center justify-between text-[11px] text-[#82877a]">
+                <span>今日學習進度</span>
+                <span className="text-[#66816a]">+12%</span>
+              </div>
+              <div className="mt-3 flex items-end justify-between">
+                <span className="font-serif text-2xl text-[#314c3b]">いい調子！</span>
+                <span className="text-xs text-[#82877a]">連續 7 天</span>
+              </div>
+              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[#e8e8df]">
+                <div className="h-full w-3/4 rounded-full bg-[#789174]" />
+              </div>
+            </div>
+
+            <div className="absolute -left-5 top-1/2 hidden -translate-y-1/2 rounded-2xl border border-white/80 bg-[#fffefa]/95 p-4 shadow-[0_20px_40px_rgba(26,34,30,0.12)] sm:block">
+              <p className="text-[10px] tracking-[0.18em] text-[#999b8f]">WORD OF THE DAY</p>
+              <p className="mt-1 font-serif text-2xl text-[#314c3b]">木漏れ日</p>
+              <p className="text-xs text-[#82877a]">こもれび · 林間灑落的陽光</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="method" className="border-y border-[#e7e5dc] bg-[#efeee7]">
+          <div className="mx-auto grid max-w-7xl gap-8 px-5 py-8 sm:px-8 md:grid-cols-3 md:gap-0 lg:px-12">
+            <div className="flex items-center gap-4 md:border-r md:border-[#dcdcd1] md:px-8 md:first:pl-0">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-[#67806a]">
+                <BookOpen className="h-5 w-5" />
+              </span>
+              <div>
+                <p className="font-serif text-lg text-[#364438]">學得有脈絡</p>
+                <p className="mt-1 text-xs text-[#818579]">文法、單字與語感一起進步</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 md:border-r md:border-[#dcdcd1] md:px-8">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-[#67806a]">
+                <Headphones className="h-5 w-5" />
+              </span>
+              <div>
+                <p className="font-serif text-lg text-[#364438]">開口更自然</p>
+                <p className="mt-1 text-xs text-[#818579]">情境式口說練習，不怕說錯</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 md:pl-8">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-[#67806a]">
+                <Compass className="h-5 w-5" />
+              </span>
+              <div>
+                <p className="font-serif text-lg text-[#364438]">探索日本文化</p>
+                <p className="mt-1 text-xs text-[#818579]">在語言中發現更多日本日常</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="features" className="mx-auto max-w-7xl px-5 py-20 sm:px-8 md:py-24 lg:px-12">
+          <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
+            <div>
+              <p className="text-xs font-semibold tracking-[0.26em] text-[#8b9b7c]">A MORE HUMAN WAY TO LEARN</p>
+              <h2 className="mt-3 font-serif text-3xl text-[#29382e] sm:text-4xl">從你想學的日語，開始一段更自然的旅程</h2>
+            </div>
+            <button onClick={onStart} className="group inline-flex items-center gap-2 self-start text-sm font-medium text-[#526c54] md:self-auto">
+              看看完整學習平台
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </button>
+          </div>
+
+          <div className="mt-10 grid gap-4 md:grid-cols-3">
+            {features.map((feature) => {
+              const Icon = feature.icon;
+              return (
+                <article
+                  key={feature.number}
+                  className="group rounded-[28px] border border-[#e8e6dc] bg-[#fbfaf6] p-6 shadow-[0_16px_30px_rgba(49,76,59,0.04)] transition duration-300 hover:-translate-y-1 hover:border-[#cbd4c5] hover:shadow-[0_22px_40px_rgba(49,76,59,0.08)]"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#edf0e7] text-[#66816a]">
+                      <Icon className="h-5 w-5" />
+                    </span>
+                    <span className="text-xs font-semibold tracking-[0.2em] text-[#a9ad9f]">{feature.number}</span>
+                  </div>
+                  <h3 className="mt-7 font-serif text-xl text-[#364438]">{feature.title}</h3>
+                  <p className="mt-2 text-sm leading-7 text-[#7a7e73]">{feature.text}</p>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="mx-5 mb-12 overflow-hidden rounded-[2rem] bg-[#314c3b] sm:mx-8 lg:mx-auto lg:max-w-7xl">
+          <div className="relative flex flex-col items-start justify-between gap-8 px-7 py-12 sm:px-12 md:flex-row md:items-center md:px-16 md:py-14">
+            <div className="absolute -right-20 -top-32 h-72 w-72 rounded-full border border-white/10" />
+            <div className="absolute -right-4 -top-16 h-56 w-56 rounded-full border border-white/10" />
+
+            <div className="relative max-w-xl">
+              <p className="text-xs tracking-[0.24em] text-[#c5d2b9]">YOUR JOURNEY STARTS HERE</p>
+              <h2 className="mt-3 font-serif text-3xl text-white sm:text-4xl">日本語を、あなたの生活に合わせて。</h2>
+            </div>
+
+            <button onClick={openSignup} className="group relative inline-flex shrink-0 items-center gap-3 rounded-full bg-[#f6f4eb] px-7 py-4 text-sm font-semibold text-[#314c3b] transition hover:-translate-y-0.5">
+              立即開始
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </button>
+          </div>
+        </section>
+      </main>
+
+      <footer className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-5 pb-8 text-xs text-[#929588] sm:flex-row sm:px-8 lg:px-12">
+        <span>© 2026 AI-Nihongo · 每日少しずつ、着実に。</span>
+        <button onClick={onLogin} className="transition hover:text-[#526c54]">已經有帳號？登入</button>
+      </footer>
+
+      {signupOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="presentation">
+          <button className="absolute inset-0 bg-[#17251d]/55 backdrop-blur-sm" aria-label="關閉註冊視窗" onClick={() => setSignupOpen(false)} />
+
+          <div role="dialog" aria-modal="true" aria-labelledby="signup-title" className="relative w-full max-w-md rounded-3xl border border-white/60 bg-[#fbfaf6] p-7 shadow-2xl sm:p-9">
+            <button onClick={() => setSignupOpen(false)} aria-label="關閉" className="absolute right-5 top-5 flex h-9 w-9 items-center justify-center rounded-full text-[#85897e] transition hover:bg-[#f1efe9] hover:text-[#314c3b]">
+              ×
+            </button>
+
+            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#e8eee5] text-[#526c54]">
+              <Sparkles className="h-5 w-5" />
+            </div>
+
+            <p className="mt-6 text-xs font-semibold tracking-[0.2em] text-[#8b9b7c]">BEGIN YOUR JOURNEY</p>
+            <h2 id="signup-title" className="mt-2 font-serif text-3xl text-[#29382e]">建立你的學習旅程</h2>
+            <p className="mt-2 text-sm leading-6 text-[#7a7e73]">註冊帳號，從今天開始累積你的日語進步。</p>
+
+            {success ? (
+              <div className="mt-7 rounded-2xl border border-[#d8e5d4] bg-[#eff5eb] p-5 text-sm leading-6 text-[#49664b]">
+                <Check className="mb-2 h-5 w-5" />
+                註冊成功！請查看電子郵件完成帳號驗證，接著就可以開始學習了。
+              </div>
+            ) : (
+              <form onSubmit={handleSignup} className="mt-7 space-y-4">
+                <label className="block text-xs font-medium text-[#5f675c]">
+                  電子郵件
+                  <input
+                    type="email"
+                    required
+                    autoComplete="email"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    placeholder="you@example.com"
+                    className="mt-2 w-full rounded-2xl border border-[#dfe0d7] bg-white px-4 py-3 text-sm text-[#2c332d] shadow-inner placeholder:text-[#a09d94] focus:border-[#7a907c] focus:outline-none"
+                  />
+                </label>
+
+                <label className="block text-xs font-medium text-[#5f675c]">
+                  密碼
+                  <input
+                    type="password"
+                    required
+                    minLength={6}
+                    autoComplete="new-password"
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    placeholder="至少 6 個字元"
+                    className="mt-2 w-full rounded-2xl border border-[#dfe0d7] bg-white px-4 py-3 text-sm text-[#2c332d] shadow-inner placeholder:text-[#a09d94] focus:border-[#7a907c] focus:outline-none"
+                  />
+                </label>
+
+                {error && (
+                  <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-xs leading-5 text-red-700">
+                    {error}
+                  </p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="group flex w-full items-center justify-center gap-2 rounded-full bg-[#314c3b] px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-[#243c2d] disabled:opacity-70"
+                >
+                  {loading ? '建立帳號中…' : (
+                    <>
+                      免費註冊
+                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </>
+                  )}
+                </button>
+              </form>
+            )}
+
+            <p className="mt-5 text-center text-xs text-[#85897e]">
+              已經有帳號？
+              <button onClick={() => { setSignupOpen(false); onLogin(); }} className="font-semibold text-[#526c54] hover:text-[#314c3b]">
+                立即登入
+              </button>
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
