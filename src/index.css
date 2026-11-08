@@ -7,10 +7,12 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    scroll-padding-top: 5rem;
   }
   body {
     @apply bg-washi-50 text-sumi-700 antialiased transition-colors duration-500;
     font-feature-settings: "palt";
+    text-rendering: optimizeLegibility;
   }
   .dark body {
     @apply bg-sumi-900 text-sumi-200;
@@ -20,6 +22,16 @@
   }
   .dark ::selection {
     @apply bg-matcha-700 text-washi-100;
+  }
+  :focus-visible {
+    outline: 3px solid #789174;
+    outline-offset: 3px;
+  }
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
   }
 }
 
@@ -45,5 +57,16 @@
   rt {
     text-transform: none;
     letter-spacing: -0.02em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

@@ -16,6 +16,8 @@ import { ErrorNotebookModal } from '@/components/ErrorNotebookModal';
 import { AuthModal } from '@/components/AuthModal';
 import { LandingPage } from '@/components/LandingPage';
 
+const DASHBOARD_STORAGE_KEY = 'ai-nihongo-dashboard-visited';
+
 function App() {
   const streak = 42;
   const wordsToday = 28;
@@ -25,11 +27,26 @@ function App() {
   const [speakingScenario, setSpeakingScenario] = useState<ScenarioKey | null>(null);
   const [notebookOpen, setNotebookOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
-  const [showDashboard, setShowDashboard] = useState(false);
+  const [showDashboard, setShowDashboard] = useState(() => {
+    try {
+      return window.localStorage.getItem(DASHBOARD_STORAGE_KEY) === 'true';
+    } catch {
+      return false;
+    }
+  });
 
   const openScenario = (key: ScenarioKey) => {
     setSpeakingScenario(key);
     setSpeakingOpen(true);
+  };
+
+  const openDashboard = () => {
+    setShowDashboard(true);
+    try {
+      window.localStorage.setItem(DASHBOARD_STORAGE_KEY, 'true');
+    } catch {
+      // Keep navigation working when browser storage is unavailable.
+    }
   };
 
   return (
@@ -103,7 +120,7 @@ function App() {
               </div>
             </div>
           ) : (
-            <LandingPage onStart={() => setShowDashboard(true)} onLogin={() => setAuthOpen(true)} />
+            <LandingPage onStart={openDashboard} onLogin={() => setAuthOpen(true)} />
           )}
 
           <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
