@@ -4,6 +4,8 @@ import { fileURLToPath, URL } from 'node:url';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  // GitHub Pages hosts this project under /JAPAN/; keep local development at /.
+  base: process.env.GITHUB_ACTIONS ? '/JAPAN/' : '/',
   plugins: [react()],
   resolve: {
     alias: {
