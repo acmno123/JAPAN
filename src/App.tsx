@@ -10,6 +10,7 @@ import { VocabProgressCard } from '@/components/VocabProgressCard';
 import { DailyRecommended } from '@/components/DailyRecommended';
 import { CountryExplorer } from '@/components/CountryExplorer';
 import { JlptReview } from '@/components/JlptReview';
+import { JlptInfinitePractice } from '@/components/JlptInfinitePractice';
 import { SpeakingPracticeModal } from '@/components/SpeakingPracticeModal';
 import { ErrorNotebookModal } from '@/components/ErrorNotebookModal';
 import { AuthModal } from '@/components/AuthModal';
@@ -79,6 +80,7 @@ function App() {
                   </div>
                 </section>
 
+                <JlptInfinitePractice />
                 <JlptReview />
                 <CountryExplorer />
 
