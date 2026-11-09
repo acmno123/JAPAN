@@ -32,16 +32,13 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
 
     if (result.error) {
       setError(result.error);
-    } else if (mode === 'signup') {
-      setSuccess(true);
-      setTimeout(() => {
-        setSuccess(false);
-        setMode('login');
-      }, 2000);
     } else {
+      // Both signUp and signIn succeed with an active session.
       onClose();
       setEmail('');
       setPassword('');
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 2000);
     }
   };
 

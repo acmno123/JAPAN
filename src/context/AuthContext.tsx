@@ -1,10 +1,13 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import type { Session, User } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase';
+import { createContext, useContext, useState, type ReactNode } from 'react';
+
+interface LocalUser {
+  email: string;
+  id: string;
+}
 
 interface AuthContextValue {
-  session: Session | null;
-  user: User | null;
+  session: { user: LocalUser } | null;
+  user: LocalUser | null;
   loading: boolean;
   signUp: (email: string, password: string) => Promise<{ error: string | null }>;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
@@ -13,43 +16,105 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
+const STORAGE_KEY = 'ai-nihongo-auth';
+const ACCOUNTS_KEY = 'ai-nihongo-accounts';
+
+interface StoredAccount {
+  email: string;
+  password: string;
+  id: string;
+}
+
+function getAccounts(): StoredAccount[] {
+  try {
+    const raw = localStorage.getItem(ACCOUNTS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveAccounts(accounts: StoredAccount[]) {
+  try {
+    localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
+  } catch {
+    // ignore
+  }
+}
+
+function getCurrentUser(): LocalUser | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function setCurrentUser(user: LocalUser | null) {
+  try {
+    if (user) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+    } else {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+  } catch {
+    // ignore
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setLoading(false);
-    });
-
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
-      setSession(newSession);
-      setLoading(false);
-    });
-
-    return () => {
-      listener.subscription.unsubscribe();
-    };
-  }, []);
+  const [user, setUser] = useState<LocalUser | null>(() => getCurrentUser());
+  const [loading] = useState(false);
 
   const signUp = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({ email, password });
-    return { error: error?.message ?? null };
+    const accounts = getAccounts();
+    if (accounts.some((a) => a.email === email)) {
+      return { error: '此電子郵件已註冊' };
+    }
+    const newAccount: StoredAccount = {
+      email,
+      password,
+      id: `user-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    };
+    accounts.push(newAccount);
+    saveAccounts(accounts);
+    const newUser: LocalUser = { email: newAccount.email, id: newAccount.id };
+    setCurrentUser(newUser);
+    setUser(newUser);
+    return { error: null };
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error: error?.message ?? null };
+    const accounts = getAccounts();
+    const account = accounts.find((a) => a.email === email);
+    if (!account) {
+      return { error: '找不到此帳號，請先註冊' };
+    }
+    if (account.password !== password) {
+      return { error: '密碼不正確' };
+    }
+    const newUser: LocalUser = { email: account.email, id: account.id };
+    setCurrentUser(newUser);
+    setUser(newUser);
+    return { error: null };
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    setCurrentUser(null);
+    setUser(null);
   };
 
   return (
     <AuthContext.Provider
-      value={{ session, user: session?.user ?? null, loading, signUp, signIn, signOut }}
+      value={{
+        session: user ? { user } : null,
+        user,
+        loading,
+        signUp,
+        signIn,
+        signOut,
+      }}
     >
       {children}
     </AuthContext.Provider>

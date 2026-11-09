@@ -103,7 +103,7 @@ function App() {
 
                           <div className="mt-6 flex flex-wrap items-center gap-3">
                             <button
-                              onClick={() => openScenario('travel')}
+                              onClick={() => openScenario('izakaya')}
                               className="inline-flex items-center justify-center gap-2 rounded-full bg-sumi-800 px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_35px_rgba(31,30,28,0.18)] transition hover:-translate-y-0.5 dark:bg-white dark:text-sumi-900"
                             >
                               開始練習
