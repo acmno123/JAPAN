@@ -1,0 +1,11 @@
+node_modules/
+dist/
+/target/
+/archive/
+src-tauri/target/
+src-tauri/gen/
+src-tauri/icons/*.png
+*.log
+.env.local
+.env.*.local
+supabase/.temp/

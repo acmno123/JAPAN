@@ -1,0 +1,48 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Kotori Japanese Studio",
+  "version": "0.3.0",
+  "identifier": "app.kotori.japanese",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "title": "ことり — Japanese Studio",
+        "width": 1360,
+        "height": 900,
+        "minWidth": 380,
+        "minHeight": 700,
+        "backgroundColor": "#f7f8f4",
+        "decorations": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": [
+      "nsis",
+      "msi"
+    ],
+    "icon": [
+      "icons/kotori.ico"
+    ],
+    "category": "Education",
+    "shortDescription": "Free Japanese learning with no energy limits",
+    "longDescription": "Free N5 Japanese lessons with interactive study paths, vocabulary, grammar, reading, listening, and spaced repetition. No hearts, energy, or paid unlocks.",
+    "windows": {
+      "nsis": {
+        "startMenuFolder": "ことり Japanese Studio",
+        "installerHooks": "windows/installer-hooks.nsh"
+      }
+    }
+  }
+}
