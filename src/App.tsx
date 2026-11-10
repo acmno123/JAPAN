@@ -3,23 +3,26 @@ import { ThemeProvider } from '@/context/ThemeContext';
 import { FuriganaProvider } from '@/context/FuriganaContext';
 import { AuthProvider } from '@/context/AuthContext';
 import { Navbar } from '@/components/Navbar';
-import { SentenceBreakdownCard } from '@/components/SentenceBreakdownCard';
 import { SpeakingPracticeCard, type ScenarioKey } from '@/components/SpeakingPracticeCard';
+import { SentenceBreakdownCard } from '@/components/SentenceBreakdownCard';
 import { VocabProgressCard } from '@/components/VocabProgressCard';
-import { DailyRecommended } from '@/components/DailyRecommended';
-import { CountryExplorer } from '@/components/CountryExplorer';
 import { JlptReview } from '@/components/JlptReview';
 import { JlptInfinitePractice } from '@/components/JlptInfinitePractice';
+import { CountryExplorer } from '@/components/CountryExplorer';
 import { SpeakingPracticeModal } from '@/components/SpeakingPracticeModal';
 import { ErrorNotebookModal } from '@/components/ErrorNotebookModal';
 import { AuthModal } from '@/components/AuthModal';
 import { LandingPage } from '@/components/LandingPage';
-import { QuickActionDock } from '@/components/QuickActionDock';
 
 const DASHBOARD_STORAGE_KEY = 'ai-nihongo-dashboard-visited';
 
+const tasks = [
+  { label: '待複習單字', detail: '根據你上次的學習記錄', value: '12 個', status: '建議現在完成', action: 'word-review' },
+  { label: '句型練習', detail: 'まだ「〜わけではない」', value: '8 題', status: '尚未完成', action: 'sentence' },
+  { label: '上次學習進度', detail: 'N4 · 餐廳點餐情境', value: '進度 64%', status: '從上次繼續', action: 'continue' },
+] as const;
+
 function App() {
-  const streak = 42;
   const [speakingOpen, setSpeakingOpen] = useState(false);
   const [speakingScenario, setSpeakingScenario] = useState<ScenarioKey | null>(null);
   const [notebookOpen, setNotebookOpen] = useState(false);
@@ -27,31 +30,53 @@ function App() {
   const [showDashboard, setShowDashboard] = useState(() => {
     try { return window.localStorage.getItem(DASHBOARD_STORAGE_KEY) === 'true'; } catch { return false; }
   });
+
   const openScenario = (key: ScenarioKey) => { setSpeakingScenario(key); setSpeakingOpen(true); };
-  const openDashboard = () => { setShowDashboard(true); try { window.localStorage.setItem(DASHBOARD_STORAGE_KEY, 'true'); } catch { /* storage unavailable */ } };
-  const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const openDashboard = () => {
+    setShowDashboard(true);
+    try { window.localStorage.setItem(DASHBOARD_STORAGE_KEY, 'true'); } catch { /* storage unavailable */ }
+  };
+  const startToday = () => openScenario('izakaya');
 
   return (
     <ThemeProvider><AuthProvider><FuriganaProvider>
       {showDashboard ? (
-        <div className="app-shell page-enter relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(116,145,112,0.14),transparent_40%),linear-gradient(180deg,#f9f6f1_0%,#f4efe7_100%)] text-sumi-700 transition-colors duration-500 dark:bg-[radial-gradient(circle_at_top,_rgba(79,132,73,0.12),transparent_35%),linear-gradient(180deg,#131312_0%,#1f1e1c_100%)] dark:text-washi-100">
-          <div className="pointer-events-none fixed inset-0 z-0 opacity-80" aria-hidden>
-            <div className="ambient-orb absolute -top-28 right-0 h-[30rem] w-[30rem] rounded-full bg-matcha-100/60 blur-[110px] dark:bg-matcha-700/20" />
-            <div className="ambient-orb absolute -left-20 top-1/4 h-[28rem] w-[28rem] rounded-full bg-wood-100/80 blur-[120px] dark:bg-wood-500/10" />
-            <div className="absolute bottom-0 right-1/4 h-[24rem] w-[24rem] rounded-full bg-washi-200/80 blur-[120px] dark:bg-sumi-700/20" />
-            <div className="absolute inset-0 opacity-[0.06] dark:opacity-[0.08]" style={{ backgroundImage: 'linear-gradient(to right, rgba(92,90,83,0.6) 1px, transparent 1px), linear-gradient(to bottom, rgba(92,90,83,0.6) 1px, transparent 1px)', backgroundSize: '38px 38px' }} />
-          </div>
-          <div className="relative z-10 mx-auto max-w-[1680px]"><Navbar streak={streak} onAuthClick={() => setAuthOpen(true)} /><main className="pb-20">
-            <div className="section-shell mt-5 sm:mt-7"><div className="micro-badge"><span className="h-2 w-2 rounded-full bg-matcha-500 shadow-[0_0_12px_rgba(79,132,73,0.7)]" /> 今日學習任務 · 15 分鐘</div></div>
-            <QuickActionDock streak={streak} onStartPractice={() => openScenario('izakaya')} onOpenNotebook={() => setNotebookOpen(true)} onScrollTo={scrollTo} />
-            <div id="home" className="section-shell pt-4 sm:pt-6"><div className="hero-panel glass-panel rounded-[30px] p-4 sm:p-5"><div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-              <div className="rounded-[26px] bg-gradient-to-br from-[#f1efe8] via-white to-[#e8eee4] p-5 sm:p-7 dark:from-sumi-800 dark:via-sumi-800 dark:to-sumi-900"><div className="mb-4 flex items-center justify-between gap-4"><span className="inline-flex items-center gap-2 rounded-full border border-matcha-200 bg-matcha-50 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-matcha-700 dark:border-matcha-700/60 dark:bg-matcha-900/20 dark:text-matcha-300"><span className="h-2 w-2 rounded-full bg-matcha-500" />Today’s focus</span><span className="rounded-full border border-sumi-200 bg-white/70 px-2.5 py-1 text-xs font-medium text-sumi-500 dark:border-sumi-600 dark:bg-sumi-700/50 dark:text-sumi-300">目標 15 分鐘</span></div><h1 className="max-w-xl font-serif text-3xl leading-tight tracking-[-0.06em] text-sumi-800 dark:text-washi-100 sm:text-5xl">專屬於你的日語進步節奏</h1><p className="mt-4 max-w-xl text-sm leading-7 text-sumi-500 dark:text-sumi-300 sm:text-base">從日常句子、接待場景到 JLPT 挑戰，AI 會陪你在每一個關鍵點上建立語感與自信。</p><div className="mt-6 flex flex-wrap items-center gap-3"><button onClick={() => openScenario('izakaya')} className="inline-flex items-center justify-center gap-2 rounded-full bg-sumi-800 px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_35px_rgba(31,30,28,0.18)] transition hover:-translate-y-0.5 hover:shadow-glow dark:bg-white dark:text-sumi-900">開始練習</button><button onClick={() => setNotebookOpen(true)} className="inline-flex items-center justify-center gap-2 rounded-full border border-sumi-200 bg-white/80 px-5 py-3 text-sm font-medium text-sumi-700 transition hover:border-matcha-300 hover:text-matcha-700 dark:border-sumi-700 dark:bg-sumi-800/80 dark:text-washi-100">查看錯題本</button></div><div className="mt-8 grid gap-3 sm:grid-cols-3">{[{ label: '單字總數', value: '1,284' }, { label: '連續天數', value: `${streak}天` }, { label: '本週完成', value: '84%' }].map((item) => <div key={item.label} className="interactive-card rounded-2xl border border-sumi-200/70 bg-white/70 p-3.5 dark:border-sumi-700 dark:bg-sumi-800/70"><p className="text-[11px] uppercase tracking-[0.18em] text-sumi-400 dark:text-sumi-500">{item.label}</p><p className="mt-2 font-serif text-2xl text-sumi-700 dark:text-washi-100">{item.value}</p></div>)}</div></div>
-              <div className="rounded-[26px] border border-sumi-200/70 bg-[#fbfaf8] p-4 shadow-inner shadow-white/70 dark:border-sumi-700 dark:bg-sumi-800/80"><div className="mb-4 flex items-center justify-between"><div><p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-sumi-400 dark:text-sumi-500">Progress</p><p className="mt-1 font-serif text-2xl text-sumi-800 dark:text-washi-100">今日學習</p></div><div className="rounded-full border border-matcha-200 bg-matcha-50 px-2.5 py-1 text-xs font-medium text-matcha-700 dark:border-matcha-700/50 dark:bg-matcha-900/20 dark:text-matcha-300">+12%</div></div><div className="space-y-4">{[['閱讀理解', '78%', 'w-[78%]', 'from-matcha-400 to-matcha-600'], ['口說練習', '64%', 'w-[64%]', 'from-wood-300 to-wood-500'], ['單字記憶', '91%', 'w-[91%]', 'from-[#9bbf97] to-[#4f8449]']].map(([label, value, width, gradient]) => <div key={label} className="rounded-2xl bg-gradient-to-br from-[#ecf3e8] via-white to-[#f3eadc] p-4 dark:from-sumi-800 dark:via-sumi-800 dark:to-sumi-900"><div className="flex items-center justify-between text-xs text-sumi-500 dark:text-sumi-300"><span>{label}</span><span>{value}</span></div><div className="mt-3 h-2 overflow-hidden rounded-full bg-sumi-200/80 dark:bg-sumi-700"><div className={`h-full rounded-full bg-gradient-to-r ${gradient} ${width}`} /></div></div>)}</div></div>
-            </div></div></div>
-            <section className="reveal-section section-shell pt-14" id="features"><div className="mb-7 flex items-end justify-between gap-4"><div><p className="text-sm font-medium tracking-[0.26em] text-matcha-600 dark:text-matcha-300">CORE FEATURES</p><h2 className="mt-2 font-serif text-3xl tracking-tight text-sumi-800 dark:text-washi-100 sm:text-4xl">讓學習更像一段有節奏的生活</h2></div><span className="hidden h-px flex-1 bg-gradient-to-r from-transparent via-sumi-300 to-transparent dark:via-sumi-700 sm:block" /></div><div className="feature-grid grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3"><SentenceBreakdownCard /><SpeakingPracticeCard onSelect={openScenario} /><VocabProgressCard onOpenNotebook={() => setNotebookOpen(true)} /></div></section>
-            <div id="infinite-practice"><JlptInfinitePractice /></div><JlptReview /><CountryExplorer /><div id="daily" /><DailyRecommended />
-            <footer className="section-shell mt-20"><div className="flex flex-col items-center gap-3 border-t border-washi-200/70 pt-8 dark:border-sumi-700/60"><div className="flex items-center gap-2"><span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-matcha-400 to-matcha-600 text-white shadow-soft">✦</span><span className="font-serif text-sm font-bold text-sumi-700 dark:text-washi-100">AI-Nihongo</span></div><p className="text-center text-xs text-sumi-400 dark:text-sumi-500">AI 驅動的日語學習平台 · 毎日少しずつ、着実に</p></div></footer>
-          </main></div>
+        <div className="app-shell min-h-screen bg-[#f7f8fa] text-[#172033] dark:bg-[#10141d] dark:text-[#f5f7fb]">
+          <Navbar streak={42} onAuthClick={() => setAuthOpen(true)} />
+          <main className="today-page mx-auto max-w-[1240px] px-5 pb-24 pt-10 sm:px-8 lg:pt-16">
+            <header className="today-header border-b border-[#dfe3ea] pb-10 dark:border-[#2b3342]">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold tracking-wide text-[#5367d8] dark:text-[#9ca9ff]">星期二 · 11 月 10 日</p>
+                  <h1 className="mt-3 max-w-3xl text-4xl font-bold tracking-[-0.045em] text-[#111827] dark:text-white sm:text-6xl">今天要完成什麼？</h1>
+                  <p className="mt-4 max-w-xl text-base leading-7 text-[#657084] dark:text-[#aeb7c7]">完成一個小任務，就能讓今天的日語更靠近真正使用。</p>
+                </div>
+                <div className="hidden border-l border-[#dfe3ea] pl-8 text-right dark:border-[#2b3342] md:block">
+                  <p className="text-sm text-[#657084] dark:text-[#aeb7c7]">今日預計</p>
+                  <p className="mt-1 text-3xl font-bold text-[#111827] dark:text-white">15 分鐘</p>
+                </div>
+              </div>
+              <button onClick={startToday} className="primary-action mt-8 inline-flex items-center gap-3 bg-[#5367d8] px-6 py-3.5 text-sm font-bold text-white shadow-[0_10px_24px_rgba(83,103,216,0.24)] transition hover:-translate-y-0.5 hover:bg-[#4458c7] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#5367d8]">
+                開始今日練習 <span aria-hidden>→</span>
+              </button>
+            </header>
+            <section aria-labelledby="tasks-title" className="pt-10">
+              <div className="flex items-end justify-between gap-4"><div><p className="text-xs font-bold tracking-[0.16em] text-[#5367d8]">TODAY</p><h2 id="tasks-title" className="mt-2 text-2xl font-bold tracking-[-0.03em] text-[#172033] dark:text-white">今日學習任務</h2></div><span className="text-sm text-[#657084] dark:text-[#aeb7c7]">0 / 3 已完成</span></div>
+              <div className="mt-5 divide-y divide-[#e2e6ec] border-y border-[#e2e6ec] dark:divide-[#2b3342] dark:border-[#2b3342]">
+                {tasks.map((task, index) => <button key={task.action} onClick={() => task.action === 'continue' ? startToday() : setNotebookOpen(true)} className="task-row group grid w-full gap-4 py-5 text-left transition hover:bg-white dark:hover:bg-[#171d29] sm:grid-cols-[40px_1fr_auto] sm:items-center">
+                  <span className="flex h-8 w-8 items-center justify-center border border-[#cfd5df] text-sm font-bold text-[#657084] dark:border-[#424b5d] dark:text-[#aeb7c7]">{index + 1}</span>
+                  <span><span className="block text-base font-bold text-[#172033] dark:text-white">{task.label}</span><span className="mt-1 block text-sm text-[#657084] dark:text-[#aeb7c7]">{task.detail}</span></span>
+                  <span className="flex items-center justify-between gap-5 sm:justify-end"><span><span className="block text-right text-lg font-bold text-[#172033] dark:text-white">{task.value}</span><span className="mt-1 block text-right text-xs text-[#657084] dark:text-[#aeb7c7]">{task.status}</span></span><span className="text-xl text-[#5367d8] transition group-hover:translate-x-1" aria-hidden>→</span></span>
+                </button>)}
+              </div>
+            </section>
+            <section className="mt-14 grid gap-10 border-t border-[#dfe3ea] pt-10 dark:border-[#2b3342] lg:grid-cols-[1fr_0.72fr]">
+              <div><p className="text-xs font-bold tracking-[0.16em] text-[#5367d8]">RECOMMENDED FOR YOU</p><h2 className="mt-2 text-2xl font-bold tracking-[-0.03em] text-[#172033] dark:text-white">今日推薦情境</h2><div className="mt-5 border border-[#dfe3ea] bg-white p-6 dark:border-[#2b3342] dark:bg-[#171d29] sm:p-8"><div className="flex items-start justify-between gap-5"><div><p className="text-sm font-bold text-[#5367d8] dark:text-[#9ca9ff]">生活會話 · N4</p><h3 className="mt-3 text-2xl font-bold text-[#172033] dark:text-white">在居酒屋點餐</h3><p className="mt-3 max-w-md text-sm leading-6 text-[#657084] dark:text-[#aeb7c7]">練習如何入座、詢問推薦菜色，並自然地向店員點餐。</p></div><span className="text-3xl" aria-hidden>🍶</span></div><div className="mt-7 flex items-center justify-between border-t border-[#e7e9ee] pt-5 text-sm dark:border-[#2b3342]"><span className="text-[#657084] dark:text-[#aeb7c7]">約 8 分鐘 · 口說</span><button onClick={startToday} className="font-bold text-[#5367d8] hover:text-[#4458c7]">開始情境 →</button></div></div></div>
+              <aside><p className="text-xs font-bold tracking-[0.16em] text-[#5367d8]">CONTINUE</p><h2 className="mt-2 text-2xl font-bold tracking-[-0.03em] text-[#172033] dark:text-white">上次學到這裡</h2><div className="mt-5 border-l-2 border-[#5367d8] pl-5"><p className="text-sm text-[#657084] dark:text-[#aeb7c7]">餐廳點餐 · 第 4 課</p><p className="mt-2 text-lg font-bold text-[#172033] dark:text-white">表達需求與確認</p><div className="mt-5 h-1.5 bg-[#e4e7ed] dark:bg-[#2b3342]"><div className="h-full w-[64%] bg-[#5367d8]" /></div><p className="mt-2 text-right text-xs font-semibold text-[#657084] dark:text-[#aeb7c7]">64%</p></div></aside>
+            </section>
+            <section className="mt-16 border-t border-[#dfe3ea] pt-10 dark:border-[#2b3342]"><div className="flex items-end justify-between gap-4"><div><p className="text-xs font-bold tracking-[0.16em] text-[#5367d8]">EXPLORE</p><h2 className="mt-2 text-2xl font-bold tracking-[-0.03em] text-[#172033] dark:text-white">需要其他練習？</h2></div><button onClick={() => setNotebookOpen(true)} className="text-sm font-bold text-[#5367d8]">查看錯題本 →</button></div><div className="mt-6 grid gap-5 md:grid-cols-3"><div className="minimal-tool"><SentenceBreakdownCard /></div><div className="minimal-tool"><SpeakingPracticeCard onSelect={openScenario} /></div><div className="minimal-tool"><VocabProgressCard onOpenNotebook={() => setNotebookOpen(true)} /></div></div></section>
+            <div className="mt-16 space-y-16"><JlptInfinitePractice /><JlptReview /><CountryExplorer /></div>
+          </main>
         </div>
       ) : <LandingPage onStart={openDashboard} onLogin={() => setAuthOpen(true)} />}
       <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} /><SpeakingPracticeModal open={speakingOpen} onClose={() => setSpeakingOpen(false)} scenarioKey={speakingScenario} /><ErrorNotebookModal open={notebookOpen} onClose={() => setNotebookOpen(false)} />
