@@ -18,6 +18,8 @@
 @layer components {
   .section-shell { @apply mx-auto w-full max-w-[1650px] px-4 sm:px-6 lg:px-8; }
   .micro-badge { @apply inline-flex items-center gap-2 rounded-full border border-matcha-200/80 bg-white/80 px-3.5 py-2 text-[11px] font-medium tracking-[0.12em] text-matcha-700 shadow-soft backdrop-blur-sm dark:border-matcha-700 dark:bg-sumi-800/75 dark:text-matcha-300; }
+  .glass-panel { @apply border border-white/50 bg-white/60 shadow-soft-lg backdrop-blur-xl dark:border-sumi-700/70 dark:bg-sumi-800/60; }
+  .interactive-card { @apply transition duration-300 ease-out hover:-translate-y-1 hover:shadow-soft-lg; }
 }
 
 @layer utilities {
@@ -25,6 +27,8 @@
   .scrollbar-thin::-webkit-scrollbar-track { @apply bg-transparent; }
   .scrollbar-thin::-webkit-scrollbar-thumb { @apply rounded-full bg-sumi-200/70 dark:bg-sumi-700; }
   .scrollbar-thin::-webkit-scrollbar-thumb:hover { @apply bg-matcha-300 dark:bg-matcha-600; }
+  .text-balance { text-wrap: balance; }
+  .glow-matcha { box-shadow: 0 0 0 1px rgba(111,160,105,.18), 0 12px 34px rgba(79,132,73,.16); }
   ruby { ruby-position: over; }
   rt { text-transform: none; letter-spacing: -0.02em; }
 }
